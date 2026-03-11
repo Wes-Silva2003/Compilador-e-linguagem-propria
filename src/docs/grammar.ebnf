@@ -1,0 +1,147 @@
+(* ------------------------------------------------------ *)
+(* 🌟 CIRIUS GRAMMAR - Gramática Completa da Linguagem Cirius *)
+(* ------------------------------------------------------ *)
+(* Linguagem inspirada em C, com foco em simplicidade,   *)
+(* clareza e controle direto sobre o fluxo do programa.  *)
+(* Esta gramática define todos os elementos sintáticos   *)
+(* reconhecidos pelo compilador Cirius.                  *)
+(* ------------------------------------------------------ *)
+
+program             = { global_decl | function_decl } ;
+
+(* ------------------------------------------------------ *)
+(* 🔹 Declarações Globais e de Funções *)
+(* ------------------------------------------------------ *)
+global_decl         = assignment ;
+
+function_decl       = "func", IDENT, "(", [ param_list ], ")", block ;
+param_list          = IDENT, { ",", IDENT } ;
+
+(* ------------------------------------------------------ *)
+(* 🔸 Estruturas de Bloco e Escopo *)
+(* ------------------------------------------------------ *)
+block               = "{", { statement }, "}" ;
+
+statement           = assignment
+                    | multi_assignment
+                    | if_statement
+                    | while_statement
+                    | for_statement
+                    | function_call, ";"
+                    | print_statement, ";"
+                    | input_statement, ";"
+                    | return_statement, ";"
+                    | break_statement, ";"
+                    | continue_statement, ";"
+                    | comment
+                    ;
+
+(* ------------------------------------------------------ *)
+(* 🧩 Atribuições e Expressões *)
+(* ------------------------------------------------------ *)
+assignment          = IDENT, assign_op, expression, ";" ;
+multi_assignment    = IDENT, { ",", IDENT }, "=", expression, { ",", expression }, ";" ;
+
+assign_op           = "=" | "+=" | "-=" | "*=" | "/=" | "%=" ;
+
+(* ------------------------------------------------------ *)
+(* 🔀 Estruturas de Controle *)
+(* ------------------------------------------------------ *)
+if_statement        = "if", expression, block,
+                      { "elif", expression, block },
+                      [ "else", block ] ;
+
+while_statement     = "while", expression, block ;
+
+for_statement       = "for", IDENT, "in", range_expr, block ;
+
+range_expr          = expression, "..", expression ;
+
+break_statement     = "break" ;
+continue_statement  = "continue" ;
+
+return_statement    = "return", [ expression ] ;
+
+(* ------------------------------------------------------ *)
+(* 🖨️ Entrada e Saída *)
+(* ------------------------------------------------------ *)
+print_statement     = "print", "(", expression, ")" ;
+input_statement     = "input", "(", ")" ;
+
+(* ------------------------------------------------------ *)
+(* 🔢 Expressões *)
+(* ------------------------------------------------------ *)
+expression          = logic_or ;
+
+logic_or            = logic_and, { "or", logic_and } ;
+logic_and           = bitwise_or, { "and", bitwise_or } ;
+
+bitwise_or          = bitwise_xor, { "|", bitwise_xor } ;
+bitwise_xor         = bitwise_and, { "^", bitwise_and } ;
+bitwise_and         = equality, { "&", equality } ;
+
+equality            = comparison, { ("==" | "!="), comparison } ;
+comparison          = term, { ("<" | "<=" | ">" | ">="), term } ;
+
+term                = factor, { ("+" | "-"), factor } ;
+factor              = shift, { ("*" | "/" | "%"), shift } ;
+
+shift               = unary, { ("<<" | ">>"), unary } ;
+
+unary               = [ ("not" | "-" | "+" | "~" | "++" | "--") ], primary ;
+
+primary             = NUMBER
+                    | FLOAT
+                    | STRING
+                    | MULTILINE_STRING
+                    | BOOLEAN
+                    | IDENT
+                    | function_call
+                    | cast_expr
+                    | "(", expression, ")"
+                    ;
+
+(* ------------------------------------------------------ *)
+(* 🧮 Chamadas de Funções e Conversões *)
+(* ------------------------------------------------------ *)
+function_call       = IDENT, "(", [ arg_list ], ")" ;
+arg_list            = expression, { ",", expression } ;
+
+cast_expr           = ("int" | "float" | "str" | "bool"), "(", expression, ")" ;
+
+(* ------------------------------------------------------ *)
+(* 💬 Comentários *)
+(* ------------------------------------------------------ *)
+comment             = "//", { character - "\n" }
+                    | "#", { character - "\n" }
+                    | "/*", { character - "*/" }, "*/"
+                    ;
+
+(* ------------------------------------------------------ *)
+(* 🔤 Tokens Léxicos *)
+(* ------------------------------------------------------ *)
+IDENT               = letter, { letter | digit | "_" } ;
+NUMBER              = digit, { digit } ;
+FLOAT               = digit, { digit }, ".", digit, { digit } ;
+STRING              = '"', { character - '"' }, '"' ;
+MULTILINE_STRING    = '"""', { character - '"""' }, '"""' ;
+BOOLEAN             = "true" | "false" ;
+
+(* ------------------------------------------------------ *)
+(* 🔣 Caracteres Básicos *)
+(* ------------------------------------------------------ *)
+letter              = "A".."Z" | "a".."z" | "_" ;
+digit               = "0".."9" ;
+character           = ? qualquer caractere ASCII válido ? ;
+
+(* ------------------------------------------------------ *)
+(* 🧩 Regras adicionais *)
+(* ------------------------------------------------------ *)
+(* - A linguagem é sensível a maiúsculas/minúsculas. *)
+(* - Variáveis podem ser declaradas globalmente. *)
+(* - Funções suportam parâmetros múltiplos e recursividade. *)
+(* - Operadores bit a bit e compostos são suportados. *)
+(* - Strings multilinha usam aspas triplas ("""). *)
+(* - Comentários podem ser de linha ou bloco. *)
+(* - Código deve estar contido em funções (exceto variáveis globais). *)
+(* ------------------------------------------------------ *)
